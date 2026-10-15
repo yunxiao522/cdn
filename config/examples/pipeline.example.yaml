@@ -1,0 +1,17 @@
+# Illustrative pipeline routing. Transformation behavior must be implemented
+# by the selected runtime.
+pipeline:
+  input_sources:
+    - http_api
+    - kafka_events
+    - mqtt_events
+    - file_events
+  processing:
+    max_in_flight: 1000
+    on_error: stop_and_report
+  outputs:
+    - id: local_results
+      type: file
+      enabled: false
+      path: ./data/output/events.jsonl
+      format: jsonl

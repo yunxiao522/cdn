@@ -1,0 +1,38 @@
+# Illustrative source definitions. All sources are disabled until implemented
+# and explicitly enabled in a deployment configuration.
+sources:
+  http_api:
+    type: http
+    enabled: false
+    endpoint: https://example.invalid/events
+    poll_interval_seconds: 5
+    request_timeout_seconds: 10
+    headers:
+      Authorization: "${HTTP_API_TOKEN}"
+
+  kafka_events:
+    type: kafka
+    enabled: false
+    brokers:
+      - localhost:9092
+    topics:
+      - events
+    consumer_group: single-node-events
+    offset_reset: earliest
+
+  mqtt_events:
+    type: mqtt
+    enabled: false
+    broker_url: mqtt://localhost:1883
+    client_id: single-node-events
+    topics:
+      - events/#
+    qos: 1
+
+  file_events:
+    type: file
+    enabled: false
+    watch_path: ./data/input
+    pattern: "*.jsonl"
+    poll_interval_seconds: 1
+    archive_processed: true

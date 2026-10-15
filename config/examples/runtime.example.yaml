@@ -1,0 +1,15 @@
+# Illustrative, language-neutral settings. These values are not consumed by an
+# executable service in this repository.
+runtime:
+  node_id: single-node-1
+  state_dir: ./run
+  log_dir: ./logs
+  shutdown_grace_period_seconds: 30
+
+concurrency:
+  # Scale processing separately from source connections. A runtime must provide
+  # inter-process work distribution before increasing processing_processes.
+  ingest_processes_per_source: 1
+  processing_processes: 2
+  output_processes_per_destination: 1
+  max_in_flight: 1000
