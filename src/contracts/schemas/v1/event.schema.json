@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/stream/event/v1",
+  "title": "Distributed Stream Event v1",
+  "description": "Illustrative event envelope; not yet enforced by a runtime.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "producer",
+    "partition_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Stable ID reused on retries and replays for deduplication."
+    },
+    "event_type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]{0,127}$"
+    },
+    "schema_version": {
+      "const": "1"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Producer event time in RFC 3339 format."
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "partition_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Stable key used to preserve ordering for related events."
+    },
+    "trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "traceparent": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "tracestate": {
+          "type": "string",
+          "maxLength": 512
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Event-type-specific data governed by a versioned schema."
+    }
+  }
+}

@@ -1,0 +1,83 @@
+# Planning worksheet only: not a deployable manifest and deliberately contains
+# no production defaults. Replace every TBD using workload data and load tests.
+cluster:
+  id: "${STREAM_CLUSTER_ID}"
+  environment: "${STREAM_ENVIRONMENT}"
+  failure_domains:
+    count: TBD
+    placement_policy: TBD
+
+control_plane:
+  replicas: TBD
+  quorum_members_per_failure_domain: TBD
+  cpu_request: TBD
+  memory_request: TBD
+  max_unavailable_during_rollout: TBD
+
+shared_services:
+  message_bus:
+    broker_replicas: TBD
+    partitions_per_topic: TBD
+    replication_factor: TBD
+    retention_hours: TBD
+    peak_ingress_bytes_per_second: TBD
+    outage_buffer_hours: TBD
+  coordination_store:
+    replicas: TBD
+    quorum_size: TBD
+    consistency_mode: TBD
+  state_store:
+    replicas: TBD
+    capacity_bytes: TBD
+    consistency_mode: TBD
+  checkpoint_store:
+    replicas: TBD
+    retention_days: TBD
+    atomicity_scope: per_partition
+
+worker_groups:
+  ingest:
+    min_replicas: TBD
+    max_replicas: TBD
+    cpu_per_replica: TBD
+    memory_per_replica: TBD
+    max_partitions_per_replica: TBD
+  compute:
+    min_replicas: TBD
+    max_replicas: TBD
+    cpu_per_replica: TBD
+    memory_per_replica: TBD
+    max_partitions_per_replica: TBD
+  egress:
+    min_replicas: TBD
+    max_replicas: TBD
+    cpu_per_replica: TBD
+    memory_per_replica: TBD
+    max_partitions_per_replica: TBD
+
+objectives:
+  end_to_end_latency_p99_ms: TBD
+  sustained_events_per_second: TBD
+  burst_events_per_second: TBD
+  recovery_point_seconds: TBD
+  recovery_time_seconds: TBD
+  max_rebalance_seconds: TBD
+
+autoscaling:
+  metric_freshness_seconds: TBD
+  scale_out_window_seconds: TBD
+  scale_in_stabilization_seconds: TBD
+  max_replicas_per_step: TBD
+  cooldown_seconds: TBD
+  freeze_during_dependency_incident: true
+
+recovery:
+  backup_failure_domain: TBD
+  restore_test_interval_days: TBD
+  retained_replay_window_hours: TBD
+
+security:
+  workload_identity_provider: TBD
+  secrets_manager: TBD
+  tls_policy: TBD
+  network_policy_reference: TBD

@@ -1,0 +1,36 @@
+# Technology-neutral cluster topology intent; not a deployable manifest.
+cluster:
+  name: example-stream-cluster
+  failure_domains:
+    minimum: 3
+  control_plane:
+    replicas: 3
+    requires_quorum: true
+
+shared_services:
+  message_bus:
+    required: true
+    durability: replicated
+    partitioning: source-defined
+  state_store:
+    required: true
+    consistency: explicitly-configured
+  checkpoint_store:
+    required: true
+    consistency: atomic-per-partition
+
+worker_groups:
+  - role: ingest
+    replicas: 2
+    autoscaling_metric: source_lag
+  - role: compute
+    replicas: 3
+    autoscaling_metric: consumer_lag
+  - role: egress
+    replicas: 2
+    autoscaling_metric: delivery_lag
+
+operations:
+  graceful_drain_seconds: 60
+  rebalance_before_termination: true
+  secrets_from_external_manager: true

@@ -1,0 +1,44 @@
+# Logical topic plan; map these lanes to the selected broker's topic/stream
+# resources and retention/replication controls. Not an applied configuration.
+topic_naming:
+  pattern: "<environment>.<domain>.<pipeline>.<lane>.v<major>"
+  allowed_environments: [dev, test, staging, prod]
+  major_version_required: true
+
+topics:
+  - name: "prod.orders.ingest.raw.v1"
+    purpose: source-ingress
+    key: partition_key
+    ordering_scope: per-key
+    retention_hours: TBD
+    replication_factor: TBD
+
+  - name: "prod.orders.compute.normalized.v1"
+    purpose: normalized-events
+    key: partition_key
+    ordering_scope: per-key
+    retention_hours: TBD
+    replication_factor: TBD
+
+  - name: "prod.orders.egress.results.v1"
+    purpose: processed-results
+    key: partition_key
+    ordering_scope: per-key
+    retention_hours: TBD
+    replication_factor: TBD
+
+  - name: "prod.orders.compute.retry.v1"
+    purpose: delayed-retry
+    key: partition_key
+    ordering_scope: per-key
+    retention_hours: TBD
+    replication_factor: TBD
+    max_attempts: TBD
+
+  - name: "prod.orders.compute.dead-letter.v1"
+    purpose: poison-or-exhausted-events
+    key: partition_key
+    ordering_scope: per-key
+    retention_hours: TBD
+    replication_factor: TBD
+    payload_redaction_required: true

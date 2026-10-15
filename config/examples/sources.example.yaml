@@ -14,25 +14,28 @@ sources:
     type: kafka
     enabled: false
     brokers:
-      - localhost:9092
+      - broker-1.example.invalid:9092
+      - broker-2.example.invalid:9092
     topics:
       - events
-    consumer_group: single-node-events
+    consumer_group: distributed-events
     offset_reset: earliest
 
   mqtt_events:
     type: mqtt
     enabled: false
-    broker_url: mqtt://localhost:1883
-    client_id: single-node-events
+    broker_url: mqtt://mqtt.example.invalid:1883
+    client_id_prefix: distributed-events
     topics:
       - events/#
+    shared_subscription: "$share/distributed-events/events/#"
     qos: 1
 
   file_events:
     type: file
     enabled: false
-    watch_path: ./data/input
+    shared_storage_uri: storage://example.invalid/events/
     pattern: "*.jsonl"
-    poll_interval_seconds: 1
+    listing_interval_seconds: 5
+    distributed_claims: true
     archive_processed: true

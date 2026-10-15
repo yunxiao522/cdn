@@ -9,9 +9,10 @@ pipeline:
   processing:
     max_in_flight: 1000
     on_error: stop_and_report
+    partition_key: event_id
   outputs:
-    - id: local_results
-      type: file
+    - id: shared_results
+      type: shared_storage
       enabled: false
-      path: ./data/output/events.jsonl
+      uri: storage://example.invalid/output/events/
       format: jsonl

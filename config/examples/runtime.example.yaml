@@ -1,15 +1,22 @@
-# Illustrative, language-neutral settings. These values are not consumed by an
+# Illustrative cluster settings. These values are not consumed by an
 # executable service in this repository.
 runtime:
-  node_id: single-node-1
-  state_dir: ./run
-  log_dir: ./logs
+  cluster_id: example-stream-cluster
   shutdown_grace_period_seconds: 30
 
-concurrency:
-  # Scale processing separately from source connections. A runtime must provide
-  # inter-process work distribution before increasing processing_processes.
-  ingest_processes_per_source: 1
-  processing_processes: 2
-  output_processes_per_destination: 1
-  max_in_flight: 1000
+control_plane:
+  endpoint: https://control.example.invalid
+
+shared_services:
+  message_bus_endpoint: https://broker.example.invalid
+  state_store_endpoint: https://state.example.invalid
+  checkpoint_store_endpoint: https://checkpoint.example.invalid
+
+worker_groups:
+  ingest:
+    replicas: 2
+  compute:
+    replicas: 3
+    max_in_flight_per_worker: 1000
+  egress:
+    replicas: 2

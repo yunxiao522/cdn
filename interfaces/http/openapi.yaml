@@ -1,0 +1,335 @@
+openapi: 3.1.0
+info:
+  title: Distributed Stream Runtime Control API
+  version: 0.2.0
+  description: >-
+    Planned node registration, heartbeat, partition assignment, and health
+    contract. No server implementation is included.
+servers:
+  - url: https://control.example.invalid
+    description: Control-plane endpoint placeholder; not a live service.
+paths:
+  /v1/nodes/{nodeId}/registration:
+    put:
+      operationId: registerNode
+      summary: Register or refresh a node identity and capabilities
+      parameters:
+        - $ref: "#/components/parameters/NodeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NodeRegistration"
+      responses:
+        "200":
+          description: Registration accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeLease"
+        "400":
+          description: Invalid registration payload.
+        "401":
+          description: Authentication is required.
+        "409":
+          description: Node identity conflicts with an active registration.
+      security:
+        - bearerAuth: []
+  /v1/nodes/{nodeId}/heartbeat:
+    post:
+      operationId: reportNodeHeartbeat
+      summary: Report node health and renew its membership lease
+      parameters:
+        - $ref: "#/components/parameters/NodeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NodeHeartbeat"
+      responses:
+        "200":
+          description: Heartbeat accepted with current control-plane epoch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeLease"
+        "401":
+          description: Authentication is required.
+        "404":
+          description: Node is not registered.
+        "409":
+          description: Stale node generation or heartbeat sequence.
+      security:
+        - bearerAuth: []
+  /v1/nodes/{nodeId}/assignments:
+    get:
+      operationId: getNodeAssignments
+      summary: Get the node's current partition assignments
+      parameters:
+        - $ref: "#/components/parameters/NodeId"
+      responses:
+        "200":
+          description: Current assignment snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssignmentSnapshot"
+        "401":
+          description: Authentication is required.
+        "404":
+          description: Node is not registered.
+      security:
+        - bearerAuth: []
+  /v1/nodes/{nodeId}/assignments/acknowledgements:
+    post:
+      operationId: acknowledgeNodeAssignments
+      summary: Acknowledge an assignment epoch after local preparation
+      parameters:
+        - $ref: "#/components/parameters/NodeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignmentAcknowledgement"
+      responses:
+        "202":
+          description: Assignment acknowledgement accepted.
+        "400":
+          description: Invalid acknowledgement.
+        "401":
+          description: Authentication is required.
+        "409":
+          description: Assignment epoch is stale or no longer owned by this node.
+      security:
+        - bearerAuth: []
+  /v1/nodes/{nodeId}/drain:
+    post:
+      operationId: requestNodeDrain
+      summary: Mark a node as draining before planned termination
+      parameters:
+        - $ref: "#/components/parameters/NodeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DrainRequest"
+      responses:
+        "202":
+          description: Drain request accepted.
+        "401":
+          description: Authentication is required.
+        "404":
+          description: Node is not registered.
+      security:
+        - bearerAuth: []
+  /health/live:
+    servers:
+      - url: https://worker.example.invalid
+        description: Per-node health endpoint placeholder; not a live service.
+    get:
+      operationId: getLiveness
+      summary: Report whether the process is alive
+      responses:
+        "200":
+          description: Process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+              example:
+                status: alive
+  /health/ready:
+    servers:
+      - url: https://worker.example.invalid
+        description: Per-node health endpoint placeholder; not a live service.
+    get:
+      operationId: getReadiness
+      summary: Report whether the process can accept assigned work
+      responses:
+        "200":
+          description: Process is ready.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+              example:
+                status: ready
+        "503":
+          description: Process is not ready.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+              example:
+                status: not_ready
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    NodeId:
+      name: nodeId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+  schemas:
+    NodeRegistration:
+      type: object
+      additionalProperties: false
+      required:
+        - role
+        - zone
+        - softwareVersion
+        - capabilities
+        - generation
+      properties:
+        role:
+          type: string
+          enum: [ingest, compute, egress, control]
+        zone:
+          type: string
+          minLength: 1
+        softwareVersion:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        generation:
+          type: integer
+          minimum: 0
+    NodeHeartbeat:
+      type: object
+      additionalProperties: false
+      required:
+        - generation
+        - sequence
+        - status
+      properties:
+        generation:
+          type: integer
+          minimum: 0
+        sequence:
+          type: integer
+          minimum: 0
+        status:
+          type: string
+          enum: [starting, ready, degraded, draining]
+        observedAt:
+          type: string
+          format: date-time
+        metrics:
+          type: object
+          description: Bounded, non-sensitive health metrics only.
+          additionalProperties:
+            type: number
+    NodeLease:
+      type: object
+      additionalProperties: false
+      required: [nodeId, generation, controlEpoch, expiresAt]
+      properties:
+        nodeId:
+          type: string
+        generation:
+          type: integer
+          minimum: 0
+        controlEpoch:
+          type: integer
+          minimum: 0
+        expiresAt:
+          type: string
+          format: date-time
+    AssignmentSnapshot:
+      type: object
+      additionalProperties: false
+      required: [nodeId, ownerGeneration, epoch, assignments]
+      properties:
+        nodeId:
+          type: string
+        ownerGeneration:
+          type: integer
+          minimum: 0
+        epoch:
+          type: integer
+          minimum: 0
+        assignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/PartitionAssignment"
+    PartitionAssignment:
+      type: object
+      additionalProperties: false
+      required:
+        - sourceId
+        - partitionId
+        - assignmentEpoch
+        - ownerGeneration
+        - leaseToken
+        - leaseExpiresAt
+      properties:
+        sourceId:
+          type: string
+        partitionId:
+          type: string
+        assignmentEpoch:
+          type: integer
+          minimum: 0
+        ownerGeneration:
+          type: integer
+          minimum: 0
+        leaseToken:
+          type: string
+          description: Opaque fencing token; never a long-lived credential.
+        leaseExpiresAt:
+          type: string
+          format: date-time
+        startPosition:
+          type: string
+    AssignmentAcknowledgement:
+      type: object
+      additionalProperties: false
+      required: [ownerGeneration, epoch, preparedPartitionIds]
+      properties:
+        ownerGeneration:
+          type: integer
+          minimum: 0
+        epoch:
+          type: integer
+          minimum: 0
+        preparedPartitionIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+    DrainRequest:
+      type: object
+      additionalProperties: false
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          maxLength: 256
+        deadline:
+          type: string
+          format: date-time
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - alive
+            - ready
+            - not_ready
