@@ -8,11 +8,27 @@ pipeline:
     - file_events
   processing:
     max_in_flight: 1000
-    on_error: stop_and_report
-    partition_key: event_id
+    partition_key: partition_key
+    idempotency_key: event_id
+    delivery_contract: at_least_once
+    invalid_event: quarantine
+    retry:
+      max_attempts: TBD
+      exhausted_route: dead_letter
+    backpressure:
+      mode: pause_source
   outputs:
     - id: shared_results
       type: shared_storage
       enabled: false
       uri: storage://example.invalid/output/events/
       format: jsonl
+      delivery:
+        idempotency_key: output_intent_id
+        completion_manifest_required: true
+        overwrite_existing: false
+        batch_max_records: TBD
+        batch_max_bytes: TBD
+        flush_interval_ms: TBD
+        retry_max_attempts: TBD
+        retry_max_age_seconds: TBD

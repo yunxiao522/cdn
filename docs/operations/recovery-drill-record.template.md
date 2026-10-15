@@ -18,6 +18,9 @@ Copy this file for each approved exercise and fill in all fields.
 - Last committed checkpoint/offset per affected partition: `TBD`
 - Broker end offsets and retained replay window: `TBD`
 - Assignment epochs and owners: `TBD`
+- Heartbeat/lease policy version and observed lease safety margin: `TBD`
+- Pipeline plan generation and scheduler policy version: `TBD`
+- Barrier ID and participant partitions, if applicable: `TBD`
 - State/checkpoint snapshot manifest and checksum: `TBD`
 - Sink idempotency/deduplication state: `TBD`
 - Baseline lag, p99 latency, errors, and resource use: `TBD`
@@ -38,6 +41,9 @@ Copy this file for each approved exercise and fill in all fields.
 - Lost, duplicated, delayed, or quarantined events: `TBD`
 - Maximum lag and time to return to objective: `TBD`
 - Stale epoch writes rejected: `TBD`
+- Stale generation/plan messages rejected: `TBD`
+- Assignments moved / rebalance churn / scheduler decision reason: `TBD`
+- Barrier completion/abort result and wait duration, if applicable: `TBD`
 - Sink ambiguous outcomes reconciled: `TBD`
 - Exit criteria passed/failed: `TBD`
 - Safety stop invoked? Why? `TBD`

@@ -6,6 +6,8 @@ radius, test data, and a verified rollback/stop procedure.
 For disaster-recovery restore sequencing, use
 [`disaster-recovery-runbook.md`](disaster-recovery-runbook.md); capture each
 exercise with [`recovery-drill-record.template.md`](recovery-drill-record.template.md).
+For full-node rolling-upgrade rehearsals, use
+[`full-node-upgrade-runbook.md`](full-node-upgrade-runbook.md).
 
 ## Preconditions
 
@@ -31,6 +33,15 @@ exercise with [`recovery-drill-record.template.md`](recovery-drill-record.templa
 | Zone loss | Remove one failure domain | Required control quorum and service replicas survive; partition ownership is fenced/reassigned; recovery objectives are met |
 | Rolling schema change | Run mixed versions against compatible and incompatible events | Compatible versions interoperate; incompatible data is held/quarantined explicitly; rollback or migration path works |
 | Capacity/rebalance stress | Increase load or worker count across rebalance | Lag, tail latency, and rebalance duration stay within declared objectives; scaling stops safely when limits are reached |
+| Heartbeat jitter / delay | Delay or drop a bounded number of heartbeat requests, then restore delivery | Node suspicion is observable; no overlapping valid owners; lease safety margin and fencing behavior match policy |
+| Stale-generation reconnect | Restart a node and replay a heartbeat/ack from its previous generation | Old generation is rejected and cannot renew leases, acknowledge plans, or commit writes |
+| Control-plane leader change | Stop the active controller while quorum remains, then restore it | One authoritative plan/epoch history continues; no duplicate assignment or reset epoch |
+| Scheduler stale capacity | Freeze or corrupt a non-production worker capacity report | Scheduler marks it stale/ineligible per policy and does not over-assign it |
+| Scheduling hot partition | Generate skewed keys with one dominant partition | Hot-partition lag is surfaced; rebalance does not claim extra parallelism or break key order |
+| Rebalance drain timeout | Hold an old worker in-flight beyond its bounded drain deadline | Old epoch is fenced before replacement commits; recovery replays from last durable progress |
+| Cross-node barrier participant loss | Remove a worker while a declared global barrier is pending | Barrier remains incomplete or follows explicit abort/partial policy; checkpoint does not cross unresolved boundary |
+| Coordinator/store outage | Make coordination quorum/store unavailable in an isolated test | No new assignments or unsafe barrier completion; current owners obey lease/fencing safety |
+| Network partition and stale writer | Isolate old owner from control plane but retain data-service path, then attempt commit after reassignment | Storage/sink rejects stale epoch; no dual writes; alert and audit evidence are present |
 
 ## Acceptance record
 
@@ -44,6 +55,10 @@ For each run, record:
   passed; link relevant sanitized telemetry.
 - Follow-up actions with an owner and due date for every failure or unexplained
   result.
+- For coordination/scheduling drills, also record heartbeat interval and lease
+  policy version, missed-heartbeat sequence, plan generation, old/new
+  assignment epochs, placement decision reason, participants, barrier ID, and
+  stale-write rejection evidence.
 
 A drill passes only when all safety and service objectives are met and results
 are reviewed. Any split-brain write, acknowledged data loss, secret exposure,

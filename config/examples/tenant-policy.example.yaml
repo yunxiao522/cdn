@@ -1,0 +1,34 @@
+# Illustrative tenant isolation and admission policy; not consumed by a runtime.
+# Tenant identity must come from authenticated workload/configuration, not an
+# untrusted event field. All limits are deployment inputs requiring load tests.
+policy:
+  enabled: false
+  identity_source: authenticated_pipeline_binding
+  unknown_tenant_action: reject_and_alert
+  fairness: weighted_deficit_round_robin
+  admission:
+    event_rate_per_second: TBD
+    byte_rate_per_second: TBD
+    burst_events: TBD
+    burst_bytes: TBD
+    maximum_event_bytes: TBD
+  overload:
+    action: backpressure_then_reject
+    retry_after_seconds: TBD
+    reject_before_durable_acceptance: true
+
+tenants:
+  - id: example-tenant
+    weight: TBD
+    max_in_flight_events: TBD
+    max_in_flight_bytes: TBD
+    max_active_partitions: TBD
+    max_retry_backlog_events: TBD
+    max_dead_letter_backlog_events: TBD
+    pipeline_allowlist:
+      - orders
+    source_allowlist:
+      - kafka_events
+    sink_allowlist:
+      - shared_results
+    priority_class: standard

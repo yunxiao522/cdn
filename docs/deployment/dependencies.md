@@ -58,6 +58,10 @@ flowchart LR
 | Telemetry backend | Nodes and operators | Metrics, logs, traces, retention, access control, alert routing |
 | Backup/object storage | Recovery operations | Separate failure domain, encryption, integrity verification, restore testing |
 
+The required telemetry signals, bounded dimensions, redaction, and degraded
+backend behavior are specified in
+[`../observability.md`](../observability.md).
+
 ## Failure impact and safe behavior
 
 | Dependency failure | Expected impact | Safe behavior to specify and test |

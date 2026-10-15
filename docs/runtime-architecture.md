@@ -1,8 +1,15 @@
 # Distributed Runtime Architecture
 
-This document describes a technology-neutral multi-node target architecture.
-It is a design plan, not a runnable deployment. No cluster control plane, data
-plane, connector, or supervisor has been implemented.
+This document describes a centralized control plane managing a distributed,
+multi-node data plane. “Centralized” means one logical authority, not one
+control-plane process; use quorum-backed replicas for availability. The
+federated alternative and single-node migration guidance are in
+[`architecture-modes.md`](architecture-modes.md). This is a design plan, not a
+runnable deployment. No cluster control plane, data plane, connector, or
+supervisor has been implemented.
+For the distinction between cluster membership/assignment and pipeline-level
+cross-node barriers and stage coordination, see
+[`cross-node-coordination.md`](cross-node-coordination.md).
 
 ## Logical architecture
 
@@ -113,6 +120,8 @@ Scale-out is useful only when there are enough independently processable
 partitions. Scale-in follows the same drain/fence/assign sequence and must not
 remove the last healthy owner for a required role. Autoscaling must use bounded
 step sizes, cooldowns, and rollback/alert behavior to avoid rebalance thrashing.
+The multi-instance placement, capacity, backpressure, and acceptance checklist
+is in [`multi-instance-operations.md`](multi-instance-operations.md).
 
 ## Consistency and failure boundaries
 
@@ -146,6 +155,9 @@ Do not start workers before their shared dependencies are ready. During
 shutdown, stop intake, drain or checkpoint work, release/fence partition
 ownership, and then terminate nodes. During rolling upgrades, maintain
 backward-compatible event contracts or coordinate schema migration.
+For the detailed provider-neutral startup, canary, abort, and shutdown
+sequence, see
+[`deployment/cluster-bootstrap-runbook.md`](deployment/cluster-bootstrap-runbook.md).
 
 ## Real-time scope
 

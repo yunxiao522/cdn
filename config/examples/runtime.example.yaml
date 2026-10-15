@@ -1,4 +1,5 @@
-# Illustrative cluster settings. These values are not consumed by an
+# Illustrative cluster settings. Replica counts and limits are examples only,
+# not capacity or availability targets. Values are not consumed by an
 # executable service in this repository.
 runtime:
   cluster_id: example-stream-cluster

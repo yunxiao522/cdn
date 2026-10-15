@@ -3,6 +3,8 @@
 This is a fill-in template, not an availability commitment. Set targets from
 business requirements and validate them using the benchmark and failure-drill
 plans before production. Do not treat `TBD` as a passing threshold.
+The technology-neutral signal and telemetry requirements are in
+[`../observability.md`](../observability.md).
 
 ## Service objectives
 

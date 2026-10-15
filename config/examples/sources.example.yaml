@@ -7,6 +7,14 @@ sources:
     endpoint: https://example.invalid/events
     poll_interval_seconds: 5
     request_timeout_seconds: 10
+    pagination:
+      mode: cursor
+      cursor_parameter: TBD
+      next_cursor_response_path: TBD
+      page_size: TBD
+    retry:
+      max_attempts: TBD
+      respect_retry_after: true
     headers:
       Authorization: "${HTTP_API_TOKEN}"
 
@@ -19,6 +27,9 @@ sources:
     topics:
       - events
     consumer_group: distributed-events
+    auto_commit: false
+    commit_after_durable_publish: true
+    max_in_flight_per_partition: TBD
     offset_reset: earliest
 
   mqtt_events:
@@ -30,6 +41,8 @@ sources:
       - events/#
     shared_subscription: "$share/distributed-events/events/#"
     qos: 1
+    acknowledgement: after_durable_publish
+    session_expiry_seconds: TBD
 
   file_events:
     type: file
@@ -38,4 +51,7 @@ sources:
     pattern: "*.jsonl"
     listing_interval_seconds: 5
     distributed_claims: true
+    claim_lease_seconds: TBD
+    claim_fencing_required: true
+    completion_manifest_required: true
     archive_processed: true

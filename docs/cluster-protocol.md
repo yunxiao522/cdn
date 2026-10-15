@@ -4,10 +4,26 @@ This document specifies intended protocol semantics for the APIs in
 [`interfaces/http/openapi.yaml`](../interfaces/http/openapi.yaml). It is a
 design contract only; no control-plane or worker implementation currently
 enforces these rules.
+The intended topology is a logically centralized control authority with
+multiple data-plane nodes; the authority may run as a quorum-backed replica set
+and must not be implemented as an unsafe single writer without recovery.
+In the optional full-node profile, each node can host a control participant and
+data workers, but quorum/leader rules still determine the single authoritative
+control history. See [`full-node-cluster.md`](full-node-cluster.md).
+See [`architecture-modes.md`](architecture-modes.md) for the distinction
+between centralized multi-node operation and federated clusters.
 For network partition, split-brain, and end-to-end delivery decisions, see
 [`consistency-delivery.md`](consistency-delivery.md).
 The event envelope and topic/partition conventions are specified in
 [`data-contracts-and-topics.md`](data-contracts-and-topics.md).
+Cross-node dataflow barriers and plan-generation coordination are described in
+[`cross-node-coordination.md`](cross-node-coordination.md); they build on, and
+do not replace, the assignment epochs defined here.
+Transport authentication, heartbeat sequencing, lease safety margins, and
+reconnect behavior are specified in
+[`node-communication.md`](node-communication.md).
+Placement objectives, bounded rebalances, and load-signal requirements are in
+[`task-scheduling-and-load-balancing.md`](task-scheduling-and-load-balancing.md).
 
 ## Node identity and lifecycle
 

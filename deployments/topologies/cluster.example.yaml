@@ -1,11 +1,25 @@
 # Technology-neutral cluster topology intent; not a deployable manifest.
+# Replica counts are illustrative only, not a capacity or availability target.
+# See docs/multi-instance-operations.md before sizing a real deployment.
 cluster:
   name: example-stream-cluster
+  architecture:
+    control_model: centralized_authority
+    execution_model: multi_node_data_plane
+    management_scope: single_cluster
   failure_domains:
     minimum: 3
   control_plane:
+    # Logical single authority, implemented as a quorum-backed replica set.
+    authority: centralized
     replicas: 3
     requires_quorum: true
+    event_payload_proxy: false
+    owns:
+      - node_membership
+      - execution_plan_generation
+      - partition_assignment
+      - rebalance_and_drain
 
 shared_services:
   message_bus:
@@ -22,12 +36,18 @@ shared_services:
 worker_groups:
   - role: ingest
     replicas: 2
+    consumes_control_assignments: true
     autoscaling_metric: source_lag
   - role: compute
     replicas: 3
+    consumes_control_assignments: true
+    coordination:
+      mode: partition_local_by_default
+      global_barriers: explicit_pipeline_contract_only
     autoscaling_metric: consumer_lag
   - role: egress
     replicas: 2
+    consumes_control_assignments: true
     autoscaling_metric: delivery_lag
 
 operations:

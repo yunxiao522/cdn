@@ -84,3 +84,6 @@ on `event_id` or a domain-specific idempotency key. Track source position,
 partition, assignment epoch, attempt, schema version, and failure class as
 separate metadata. A re-drive preserves event identity, records the operator
 and reason, and is measured as replay rather than new source traffic.
+
+For stage-by-stage source acknowledgement, state, output-intent, and sink
+commit ordering, see [`processing-lifecycle.md`](processing-lifecycle.md).

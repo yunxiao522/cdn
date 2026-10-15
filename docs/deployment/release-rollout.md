@@ -2,6 +2,12 @@
 
 This is a release design template, not an implemented deployment pipeline.
 Select an orchestrator and define release tooling before using these steps.
+Record each change using
+[`release-readiness.template.md`](release-readiness.template.md), including
+configuration-only changes that affect processing semantics.
+For full-node clusters, use the specialized
+[`../operations/full-node-upgrade-runbook.md`](../operations/full-node-upgrade-runbook.md)
+for quorum-safe control-plane and fenced data-plane sequencing.
 
 ## Compatibility requirements
 
@@ -10,6 +16,9 @@ Select an orchestrator and define release tooling before using these steps.
   optional fields and old supported versions.
 - Do not remove or reinterpret fields until all producers, consumers, retained
   messages, checkpoints, and restore paths have moved past the old version.
+- Treat changes to partition keys, topic routing, retry limits, acknowledgement
+  order, output idempotency, retention, and source cursors as behavior changes;
+  compare the resolved configuration and document replay/rollback impact.
 - Store processing and schema versions with checkpoints/commit metadata so
   replay behavior is explicit.
 - Define a supported compatibility window and minimum/maximum control protocol
@@ -23,6 +32,8 @@ Select an orchestrator and define release tooling before using these steps.
    manifest. Scan dependencies and verify provenance before deployment.
 2. Validate configuration and schemas; run unit, contract, integration,
    performance, security, and recovery tests against the candidate.
+   Review the rendered/resolved configuration (with secret values omitted) and
+   compare it to the last approved version.
 3. Deploy to an isolated test cluster and run the relevant failure drills.
 4. Deploy control-plane changes to a canary/control member only when protocol
    compatibility is established; preserve quorum during replacement.
@@ -46,6 +57,9 @@ Select an orchestrator and define release tooling before using these steps.
   or restore plan rather than an unsafe binary rollback.
 - Verify partition ownership, committed positions, sink idempotency, and
   cluster health after rollback; record the incident and remediation.
+- If rollback would reinterpret existing messages or state, stop and use the
+  approved forward-fix/restore path. Do not reset source offsets or reuse
+  assignment epochs to make a rollback appear successful.
 
 ## Release record
 

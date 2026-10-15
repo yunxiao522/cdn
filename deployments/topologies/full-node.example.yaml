@@ -1,0 +1,59 @@
+# Full-node topology intent; illustrative only and not deployable.
+# Every node hosts a local agent, a control-plane participant, and data-plane
+# execution capability. Only quorum-authorized control-plane leadership may
+# mutate authoritative cluster state; workers execute only assigned partitions.
+cluster:
+  name: example-full-node-cluster
+  architecture:
+    node_model: full_node
+    control_model: quorum_leader_with_replicated_state
+    data_model: partitioned_multi_node_execution
+    event_payload_proxy: false
+
+nodes:
+  replicas: TBD
+  failure_domains: TBD
+  per_node:
+    node_agent: required
+    control_plane_participant: required
+    data_plane_capabilities:
+      - ingest
+      - compute
+      - egress
+    assignment_policy: eligible_capabilities_and_capacity
+    resource_isolation:
+      control_plane_budget: TBD
+      data_plane_budget: TBD
+      reserved_recovery_headroom: TBD
+
+control_plane:
+  consensus_provider: TBD
+  quorum_policy: provider_defined
+  leader_election: required
+  monotonic_epoch_store: required
+  minority_behavior: fail_closed_for_mutations
+  lease_and_fencing: downstream_enforced
+
+shared_services:
+  message_bus:
+    required: true
+    durability: replicated
+    partitioning: pipeline_defined
+  state_store:
+    required: true
+    consistency: explicitly_configured
+  checkpoint_store:
+    required: true
+    atomicity_scope: per_partition
+
+work_assignment:
+  one_active_owner_per_partition: true
+  process_all_events_on_every_node: false
+  rebalance_requires_drain_and_fencing: true
+  no_eligible_owner_action: pause_and_alert
+
+operations:
+  graceful_drain_seconds: TBD
+  rebalance_batch_limit: TBD
+  quorum_loss_freezes_assignment: true
+  secrets_from_external_manager: true

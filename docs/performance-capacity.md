@@ -83,6 +83,9 @@ required deployment inputs, not default recommendations.
 Use the cluster sizing worksheet at
 [`../deployments/topologies/production-capacity.template.yaml`](../deployments/topologies/production-capacity.template.yaml)
 to capture the reviewed capacity and autoscaling inputs.
+For replica placement, partition saturation, resource bounds, safe drain, and
+multi-instance acceptance evidence, see
+[`multi-instance-operations.md`](multi-instance-operations.md).
 
 | Policy input | Required value |
 | --- | --- |
